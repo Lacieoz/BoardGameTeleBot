@@ -1,0 +1,104 @@
+{ 
+    "games": [
+      {
+        "name": "Clank!",
+        "weigth": 3
+      },
+      {
+        "name": "Terraforming Mars",
+        "weigth": 4
+      },
+      {
+        "name": "Gaia Project",
+        "weigth": 5
+      },
+      {
+        "name": "Azul",
+        "weigth": 2
+      },
+      {
+        "name": "Santorini",
+        "weigth": 2
+      },
+      {
+        "name": "7 Wonders",
+        "weigth": 2
+      },
+      {
+        "name": "Great Western Trail",
+        "weigth": 4
+      },
+      {
+        "name": "Tex",
+        "weigth": 3
+      },
+      {
+        "name": "Ticket To Ride",
+        "weigth": 2
+      },
+      {
+        "name": "Catan",
+        "weigth": 2
+      },
+      {
+        "name": "Capitan Sonar",
+        "weigth": 2
+      },
+      {
+        "name": "Lorenzo il Magnifico",
+        "weigth": 3
+      },
+      {
+        "name": "Splendor",
+        "weigth": 2
+      },
+      {
+        "name": "Queendomino",
+        "weigth": 3
+      },
+      {
+        "name": "Kingdomino",
+        "weigth": 2
+      },
+      {
+        "name": "Paperback",
+        "weigth": 2
+      },
+      {
+        "name": "Star Wars Rebellion",
+        "weigth": 4
+      },
+      {
+        "name": "Klask",
+        "weigth": 2
+      },
+      {
+        "name": "Carcassonne",
+        "weigth": 2
+      },
+      {
+        "name": "Cosmic Encounter",
+        "weigth": 3
+      },
+      {
+        "name": "Rising Sun",
+        "weigth": 4
+      },
+      {
+        "name": "Zombicide - Black Plague",
+        "weigth": 3
+      },
+      {
+        "name": "X-COM",
+        "weigth": 3
+      },
+      {
+        "name": "Magic Maze",
+        "weigth": 2
+      },
+      {
+        "name": "7 Wonders Duel",
+        "weigth": 2
+      }
+    ]
+}
