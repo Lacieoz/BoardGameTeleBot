@@ -9,24 +9,6 @@ bot.command("start", "help", (msg, reply) =>
     reply.text("To schedule an alert, do: /alert <seconds> <text>"))
 
 
-bot.command("alert", (msg, reply, next) => {
-  var [ seconds, text ] = msg.args(2)
-  if(seconds == undefined) {  
-    reply.text("Invalid command.")
-  }
-  else {
-    if (!seconds.match(/^\d+$/) || !text) return next()
-    setTimeout(() => reply.text(text), Number(seconds) * 1000)
-  }
-})
-
-
-bot.command("prova", (msg, reply, next) => {
-    var test = "test"
-    reply.text(test)
-})
-
-
 bot.command("conf", (msg, reply, next) => {
     let test = readJSON("new.json")
     let arrayGames = test.games
