@@ -17,6 +17,7 @@ bot.command("prova", function (msg, reply, next) {
   reply.text("Use the buttons below to modify the volume:");
 });
 
+
 bot.callback(function (query, next) {
   console.log(query)
   // Try to parse payload data as JSON. If we succeed, and `type` is set
@@ -51,7 +52,7 @@ bot.command("conf", (msg, reply, next) => {
     reply.keyboard(keyboard1, true, true).text("Che gioco scegli?")
 })
 
-// CHOOSE A GAME 
+// CHOOSE A GAME
 
 let gameToBeChoose = []
 let choosingGamesStart = false
@@ -62,7 +63,7 @@ let maxVotes = []
 
 bot.command("start_poll", (msg, reply, next) => {
     console.log("Started a new poll")
-  
+
     // RESETTING VALUES
     gameToBeChoose = []
     choosingGamesStart = false
@@ -70,7 +71,7 @@ bot.command("start_poll", (msg, reply, next) => {
     totalVotes = 0
     randomChoice = ""
     maxVotes = []
-  
+
     let test = readJSON("new.json")
     let arrayGames = test.games
     let replyArray = []
@@ -112,9 +113,9 @@ bot.command("end_poll", (msg, reply, next) => {
         reply.text(game.name + " con " + game.count + " voti!")
       })
       reply.text("Voti Totali Effettuati : " + totalVotes)
-      
+
       if (maxVotes.length > 1) {
-        reply.text("Anche se non me l'hai chiesto effettuo una scelta randomica per te : ") 
+        reply.text("Anche se non me l'hai chiesto effettuo una scelta randomica per te : ")
         reply.text(randomChoice)
       }
     }
@@ -140,14 +141,14 @@ bot.command("end_poll", (msg, reply, next) => {
         reply.text(game.name + " con " + game.count + " voti!")
       })
       reply.text("Voti Totali Effettuati : " + totalVotes)
-      
+
       if (maxVotes.length > 1 && randomChoice == "") {
         let ind = Math.floor(Math.random() * maxVotes.length)
         reply.text("Anche se non me l'hai chiesto effettuo una scelta randomica per te : ")
-        randomChoice = maxVotes[ind].name 
+        randomChoice = maxVotes[ind].name
         reply.text(randomChoice)
       } else if(maxVotes.length > 1) {
-        reply.text("Anche se non me l'hai chiesto effettuo una scelta randomica per te : ") 
+        reply.text("Anche se non me l'hai chiesto effettuo una scelta randomica per te : ")
         reply.text(randomChoice)
       }
     }
@@ -174,12 +175,12 @@ bot.text(function (msg, reply, text) {
       let gameAdded = false
       for (let ind=0; ind<length; ind++) {
         if(gameToBeChoose[ind].name === msg.text) {
-          gameAdded = true      
+          gameAdded = true
           console.log("Game already added : " + msg.text)
-          reply.text("Gioco già aggiunto")      
+          reply.text("Gioco già aggiunto")
         }
       }
-      if (!gameAdded) {      
+      if (!gameAdded) {
         console.log("New choice done " + msg.text)
         gameToBeChoose.push({"name": msg.text, "count": 0})
         reply.text("Added")
@@ -206,9 +207,9 @@ function readFile (file) {
 }
 
 function readJSON (file) {
-  let rawdata = fs.readFileSync('new.json');  
-  let newJS = JSON.parse(rawdata);  
-  return newJS; 
+  let rawdata = fs.readFileSync('new.json');
+  let newJS = JSON.parse(rawdata);
+  return newJS;
 }
 
 function writeFile (file, data) {
