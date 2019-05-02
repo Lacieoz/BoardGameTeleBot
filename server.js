@@ -1,6 +1,7 @@
 const botgram = require("botgram")
-const bot = botgram("862407925:AAHPVI0Ww-kdA8oeXYzNfL1h8cfu2vGivTQ")
 var fs = require("fs")
+const bot = botgram("862407925:AAHPVI0Ww-kdA8oeXYzNfL1h8cfu2vGivTQ")
+
 
 let count = 1
 let choosingGame = false
@@ -8,8 +9,35 @@ let choosingGame = false
 bot.command("start", "help", (msg, reply) =>
     reply.text("To schedule an alert, do: /alert <seconds> <text>"))
 
+bot.command("prova", function (msg, reply, next) {
+  reply.inlineKeyboard([[
+    { text: "↑  Turn up", callback_data: JSON.stringify({ type: "volume", direction: true }) },
+    { text: "↓  Turn down", callback_data: JSON.stringify({ type: "volume", direction: false }) },
+  ]]);
+  reply.text("Use the buttons below to modify the volume:");
+});
 
 
+bot.callback(function (query, next) {
+  console.log(query)
+  // Try to parse payload data as JSON. If we succeed, and `type` is set
+  // to "volume" then the query is for us.
+  var data;
+  try {
+    data = JSON.parse(query.data);
+  } catch (e) {
+    return next();
+  }
+  if (data.type !== "volume")
+    return next();
+  else {
+    console.log("here")
+    // Turn volume up or down
+    let answer = "Va Bene! " + String(data.direction)
+    return query.answer({ text: answer, alert: true });
+  }
+  
+});
 
 bot.command("conf", (msg, reply, next) => {
     let test = readJSON("new.json")
