@@ -1,13 +1,16 @@
+let lib = require('./mylib');
 const botgram = require("botgram")
 var fs = require("fs")
 const bot = botgram("862407925:AAHPVI0Ww-kdA8oeXYzNfL1h8cfu2vGivTQ")
 
+bot.command("start", "help", (msg, reply) =>{
+    reply.text("To start a poll do: /startpoll")
+    reply.text("To see all the storico do: /see_storico")
+    reply.text("To add a game to storico do: /add_match")
+})
 
-let count = 1
-let choosingGame = false
+bot.all(lib.middleware);
 
-bot.command("start", "help", (msg, reply) =>
-    reply.text("To schedule an alert, do: /alert <seconds> <text>"))
 
 bot.command("prova", function (msg, reply, next) {
   reply.inlineKeyboard([[
@@ -16,7 +19,6 @@ bot.command("prova", function (msg, reply, next) {
   ]]);
   reply.text("Use the buttons below to modify the volume:");
 });
-
 
 bot.callback(function (query, next) {
   console.log(query)
@@ -36,7 +38,7 @@ bot.callback(function (query, next) {
     let answer = "Va Bene! " + String(data.direction)
     return query.answer({ text: answer, alert: true });
   }
-  
+
 });
 
 bot.command("conf", (msg, reply, next) => {
@@ -52,7 +54,9 @@ bot.command("conf", (msg, reply, next) => {
     reply.keyboard(keyboard1, true, true).text("Che gioco scegli?")
 })
 
-// CHOOSE A GAME
+/**********************************************/
+/****************CHOOSE A GAME*****************/
+/**********************************************/
 
 let gameToBeChoose = []
 let choosingGamesStart = false
@@ -72,8 +76,8 @@ bot.command("start_poll", (msg, reply, next) => {
     randomChoice = ""
     maxVotes = []
 
-    let test = readJSON("new.json")
-    let arrayGames = test.games
+    let allGames = lib.readJSON("new.json")
+    let arrayGames = allGames.games
     let replyArray = []
     arrayGames.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
     arrayGames.forEach(function (game){
@@ -155,66 +159,182 @@ bot.command("end_poll", (msg, reply, next) => {
     gameToBeChoose = []
 })
 
-bot.text(function (msg, reply, text) {
-  if (choosingGamesStart) {
-    let replyText = ""
-    if (msg.text === "DONE") {
-      console.log("Poll ended")
-      choosingGamesStart = false
-      playersChoosing = true
-      // Remove keyboard
-      reply.keyboard().text("Perfetto! Lancia il comando /choose per effettuare la tua scelta");
+/**********************************************/
+/************END CHOOSE A GAME*****************/
+/**********************************************/
+
+/**********************************************/
+/*******************STORICO********************/
+/**********************************************/
+
+let gameStorico = ""
+let playersStorico = []
+let winnerStorico = ""
+let stateStorico = "start"
+
+bot.command("add_match", function (msg, reply, next) {
+    if (stateStorico !== "start") {
+        gameStorico = ""
+        playersStorico = []
+        winnerStorico = ""
     }
-    else if (gameToBeChoose.length === 0) {
-      console.log("New choice done " + msg.text)
-      gameToBeChoose.push({"name": msg.text, "count": 0})
-      reply.text("Added")
-    }
-    else {
-      let length = gameToBeChoose.length
-      let gameAdded = false
-      for (let ind=0; ind<length; ind++) {
-        if(gameToBeChoose[ind].name === msg.text) {
-          gameAdded = true
-          console.log("Game already added : " + msg.text)
-          reply.text("Gioco già aggiunto")
-        }
-      }
-      if (!gameAdded) {
-        console.log("New choice done " + msg.text)
-        gameToBeChoose.push({"name": msg.text, "count": 0})
-        reply.text("Added")
-      }
-    }
-  }
-  if (playersChoosing) {
-    gameToBeChoose.forEach( function (game) {
-      if (game.name === msg.text) {
-        game.count++
-        reply.text("Attendi che tutti finiscano di votare poi qualcuno lanci il comando /end_poll")
-      }
+    let allGames = lib.readJSON("new.json")
+    let arrayGames = allGames.games
+    let replyArray = []
+    arrayGames.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+    arrayGames.forEach(function (game){
+        replyArray.push([{text: game.name}])
     })
-  }
+    // Display the keyboard
+    reply.keyboard(replyArray, false, true).text("Che gioco avete giocato?")
+
+    stateStorico = "game"
 });
 
+bot.command("players_storico", function (msg, reply, next) {
+    if (stateStorico !== "pl") {
+        reply.text("send command /add_match to add a new match to storico")
+    } else {
+        let jsonDoc = lib.readJSON("new.json")
+        let arrayPlayers = jsonDoc.players
+        let replyArray = []
+        arrayPlayers.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+        arrayPlayers.forEach(function (pl){
+            replyArray.push([{text: pl.name}])
+        })
+        replyArray.push([{text: "DONE"}])
+        // Display the keyboard
+        reply.keyboard(replyArray, false).text("Chi ha giocato?")
+    }
+});
+
+bot.command("winner_storico", function (msg, reply, next) {
+    if (stateStorico !== "win") {
+        reply.text("send command /add_match to add a new match to storico")
+    }
+    else {
+        let replyArray = []
+        playersStorico.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+        playersStorico.forEach(function (game){
+            replyArray.push([{text: game.name}])
+        })
+        // Display the keyboard
+        reply.keyboard(replyArray, false, true).text("Chi ha vinto?")
+
+        stateStorico = "ch_win"
+    }
+});
+
+bot.command("see_storico", function (msg, reply, next) {
+    let jsonDoc = lib.readJSON("new.json")
+    let arrayStorico = jsonDoc.storico
+    let replyString = ""
+    arrayStorico.forEach(function (sto) {
+        console.log(sto)
+        replyString += "Data : " + sto.date.substring(0,10) + " alle " + sto.date.substring(11,19) + "\n" + "Game : " + sto.game + "\n" + "Winner : " + sto.winner + "\n" + "Players : "
+        sto.players.forEach(function (pl) {
+            replyString += pl.name + "  "
+        })
+        replyString += "\n\n"
+    })
+    // Display the keyboard
+    reply.text(replyString)
+});
+
+/**********************************************/
+/***************END STORICO********************/
+/**********************************************/
+
+bot.text(function (msg, reply, text) {
+
+    // PARTE POLL
+
+    if (choosingGamesStart) {
+        let replyText = ""
+        if (msg.text === "DONE") {
+            console.log("Poll ended")
+            choosingGamesStart = false
+            playersChoosing = true
+            // Remove keyboard
+            reply.keyboard().text("Perfetto! Lancia il comando /choose per effettuare la tua scelta");
+        }
+        else if (gameToBeChoose.length === 0) {
+            console.log("New choice done " + msg.text)
+            gameToBeChoose.push({"name": msg.text, "count": 0})
+            reply.text("Added")
+        }
+        else {
+            let length = gameToBeChoose.length
+            let gameAdded = false
+            for (let ind=0; ind<length; ind++) {
+                if(gameToBeChoose[ind].name === msg.text) {
+                    gameAdded = true
+                    console.log("Game already added : " + msg.text)
+                    reply.text("Gioco già aggiunto")
+                }
+            }
+            if (!gameAdded) {
+                console.log("New choice done " + msg.text)
+                gameToBeChoose.push({"name": msg.text, "count": 0})
+                reply.text("Added")
+            }
+        }
+    }
+    if (playersChoosing) {
+        gameToBeChoose.forEach( function (game) {
+            if (game.name === msg.text) {
+                game.count++
+                reply.text("Attendi che tutti finiscano di votare poi qualcuno lanci il comando /end_poll")
+            }
+        })
+    }
+
+    // PARTE STORICO
+
+    if (stateStorico === "game") {
+        gameStorico = msg.text
+        reply.text("Perfetto! Lancia il comando /players_storico per aggiungere i giocatori")
+        stateStorico = "pl"
+    } else if (stateStorico === "pl") {
+        if (msg.text === "DONE" && playersStorico.length >= 2) {
+            console.log("Players added")
+            stateStorico = "win"
+            // Remove keyboard
+            reply.keyboard().text("Perfetto! Lancia il comando /winner_storico per aggiungere il vincitore");
+        } else if (msg.text === "DONE" && playersStorico.length <= 2){
+            reply.text("scegli almeno due giocatori")
+        } else if (playersStorico.length === 0) {
+            console.log("New player added " + msg.text)
+            playersStorico.push({"name": msg.text})
+            reply.text("Added")
+        }
+        else {
+            let length = playersStorico.length
+            let playerAdded = false
+            for (let ind=0; ind<length; ind++) {
+                if(playersStorico[ind].name === msg.text) {
+                    playerAdded = true
+                    console.log("Player already added : " + msg.text)
+                    reply.text("Player già aggiunto")
+                }
+            }
+            if (!playerAdded) {
+                console.log("New player added " + msg.text)
+                playersStorico.push({"name": msg.text})
+                reply.text("Added")
+            }
+        }
+    } else if(stateStorico === "ch_win") {
+        playersStorico.forEach(function(pl) {
+            if(pl.name === msg.text) {
+                winnerStorico = msg.text
+                lib.addGameToStorico(gameStorico, playersStorico, winnerStorico)
+                stateStorico = "start"
+                reply.text("Partita aggiunta allo storico, usare il comando /see_storico per vedere tutti i game fatti")
+            }
+        })
+    }
+});
 
 bot.command((msg, reply) =>
     reply.text("Invalid command."))
-
-
-function readFile (file) {
-  return fs.readFileSync(file, 'utf8');
-}
-
-function readJSON (file) {
-  let rawdata = fs.readFileSync('new.json');
-  let newJS = JSON.parse(rawdata);
-  return newJS;
-}
-
-function writeFile (file, data) {
-  fs.writeFile(file, data, (err) => {
-  if (err) console.log(err);
-  console.log("Successfully Written to File.");
-});
-}
